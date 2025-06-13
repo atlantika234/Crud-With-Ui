@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  client:
+    build:
+      context: ./client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    environment:
+      - REACT_APP_API_URL=http://server:8000
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: ./server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:14888/crud
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "14888:14888"
+    command: mongod --config /etc/mongo/mongod.conf
+    volumes:
+      - mongo-data:/data/db
+      - ./server/mongod.conf:/etc/mongo/mongod.conf
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge
